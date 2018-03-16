@@ -1,0 +1,72 @@
+---
+title: "ModularityHW"
+author: "Jaden Anderson"
+date: "March 13, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r modularity, include = FALSE}
+setwd("C:/Users/USER/Documents/Prog_R/Data_Carpentry/ModularityHW_Anderson")
+p_data <- readRDS("USAAnnualPcpn1950_2008.rds")
+t_data <- readRDS("USAAnnualTemp1950_2008.rds")
+yr_vec <- (1950:2008)
+
+analyze_data <- function(percip_data, temp_data, year_vec){
+
+#Removes NAs from data set
+percip_data <- percip_data[!(is.na(percip_data$data)),] 
+temp_data <- temp_data[!(is.na(temp_data$data)),]
+
+#Pulls out the average percip/temp for each state
+count <- 1
+percip_mean <- 0
+percip_data
+for(i in 1:length(state.abb)){
+  temp_mean[i] <- mean(temp_data$data[temp_data$state == state.abb[i] & temp_data$year == "1950"])
+  
+  percip_mean[i] <- mean(percip_data$data[percip_data$state == state.abb[i] & percip_data$year == "1950"])
+  
+}
+percip_mean
+temp_mean[1:53]
+
+
+temp_mean <- mean(temp_data$data[temp_data$state == "TX" & temp_data$year == "2000"])
+
+temp_data$data[temp_data$state == "TX" & temp_data$year == "1950"]
+}
+
+
+
+```
+
+```{r,blah}
+setwd("C:/Users/USER/Documents/Prog_R/Data_Carpentry/ModularityHW_Anderson")
+p_data <- readRDS("USAAnnualPcpn1950_2008.rds")
+t_data <- readRDS("USAAnnualTemp1950_2008.rds")
+yr_vec <- paste(1950:2008)
+
+
+
+p_data <- p_data[!(is.na(p_data$data)),] 
+t_data <- t_data[!(is.na(t_data$data)),]
+
+temp_mean <-0
+percip_mean <-0
+
+mean(t_data$data[t_data$state == "TX" & t_data$year == "1950"])
+cat(1:length(yr_vec))
+
+for(i in 1:length(yr_vec)){
+  for(j in 1:length(state.abb)){
+    temp_mean[i] <- mean(t_data$data[t_data$state == state.abb[j] & t_data$year == yr_vec[i]])
+    
+    #percip_mean[i] <- mean(p_data$data[p_data$state == state.abb[j] & p_data$year == yr_vec[i]])
+  }
+}
+
+```
