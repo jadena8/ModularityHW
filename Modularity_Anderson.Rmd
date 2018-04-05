@@ -2,71 +2,143 @@
 title: "ModularityHW"
 author: "Jaden Anderson"
 date: "March 13, 2018"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
+bibliography: bib.bib
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
 ```
 
-```{r modularity, include = FALSE}
+
+```{r,blah, include=FALSE, echo=FALSE}
+
 setwd("C:/Users/USER/Documents/Prog_R/Data_Carpentry/ModularityHW_Anderson")
-p_data <- readRDS("USAAnnualPcpn1950_2008.rds")
-t_data <- readRDS("USAAnnualTemp1950_2008.rds")
-yr_vec <- (1950:2008)
+######Reads in data and sets which years you will analyze#####
+######IMPORTANT, IN ORDER TO RUN PROPERLY YOU MUST CHANGE YEAR VEC TO YOUR YEARS OF INTEREST!!!! DEFAULT WILL BE TO 2016######
 
-analyze_data <- function(percip_data, temp_data, year_vec){
+######Change the end year you wish to analyze, this is the only variable needed to be changed unless you wish to upload a new dataset######
+change_year_here <- 2016
 
-#Removes NAs from data set
-percip_data <- percip_data[!(is.na(percip_data$data)),] 
-temp_data <- temp_data[!(is.na(temp_data$data)),]
+per_data <- readRDS("USAannualPcpn1950_2016.rds")
+tem_data <- readRDS("USAannualTemp1950_2016.rds")
+year_vec <- paste(1950:change_year_here)
 
-#Pulls out the average percip/temp for each state
-count <- 1
-percip_mean <- 0
-percip_data
-for(i in 1:length(state.abb)){
-  temp_mean[i] <- mean(temp_data$data[temp_data$state == state.abb[i] & temp_data$year == "1950"])
+######Function to clean up the data, analyze and plot various data described in the function######
+clean_n_analyze <- function(p_data, t_data, yr_vec){
   
-  percip_mean[i] <- mean(percip_data$data[percip_data$state == state.abb[i] & percip_data$year == "1950"])
+  #clean up the data and create temp lists and vectors for anaylsis#
+  p_data <- p_data[!(is.na(p_data$data)),] 
+  t_data <- t_data[!(is.na(t_data$data)),]
   
-}
-percip_mean
-temp_mean[1:53]
-
-
-temp_mean <- mean(temp_data$data[temp_data$state == "TX" & temp_data$year == "2000"])
-
-temp_data$data[temp_data$state == "TX" & temp_data$year == "1950"]
-}
-
-
-
-```
-
-```{r,blah}
-setwd("C:/Users/USER/Documents/Prog_R/Data_Carpentry/ModularityHW_Anderson")
-p_data <- readRDS("USAAnnualPcpn1950_2008.rds")
-t_data <- readRDS("USAAnnualTemp1950_2008.rds")
-yr_vec <- paste(1950:2008)
-
-
-
-p_data <- p_data[!(is.na(p_data$data)),] 
-t_data <- t_data[!(is.na(t_data$data)),]
-
-temp_mean <-0
-percip_mean <-0
-
-mean(t_data$data[t_data$state == "TX" & t_data$year == "1950"])
-cat(1:length(yr_vec))
-
-for(i in 1:length(yr_vec)){
-  for(j in 1:length(state.abb)){
-    temp_mean[i] <- mean(t_data$data[t_data$state == state.abb[j] & t_data$year == yr_vec[i]])
-    
-    #percip_mean[i] <- mean(p_data$data[p_data$state == state.abb[j] & p_data$year == yr_vec[i]])
+  temp_mean <-0
+  percip_mean <-0
+  
+  stored_temp_mean <- list()
+  stored_percip_mean <- list()
+  by_year <- 0
+  
+  #BULK ANALYSIS: grabs specific years and states and calculated their averages, because of the size of the dataset this will cause the script to run for a few minutes#  
+  for(i in 1:length(state.abb)){
+    for(j in 1:length(yr_vec)){
+      temp_mean[j] <- mean(t_data$data[t_data$state == state.abb[i] & t_data$year == yr_vec[j]])
+      percip_mean[j] <- mean(p_data$data[p_data$state == state.abb[i] & p_data$year == yr_vec[j]])
+  
+      stored_temp_mean[[i]] <- temp_mean
+      stored_percip_mean[[i]] <- percip_mean
+      
+      }
+  
   }
+  
+  
+  ######plotting all states average temperature on one plot######
+  cat(length(yr_vec))
+  for(i in 1:length(yr_vec)){
+    by_year[i] <- mean(t_data$data[t_data$year == yr_vec[i]])
+  }
+  png("Total_average_temp.png")
+  plot(yr_vec, rev(by_year), type='l',xlab = 'Years', ylab ='Average Temperature in F', main="Total Average Temperature")
+  
+  ######plotting average temps for all states on one plot with 3 column legend######
+  #There has been an issue in previous versions where the plot wont output, if that is the case, highlight below until #END HERE and run only the highlighted chunk of code
+  colors <- rainbow(length(state.abb))
+  
+  png("Average_temperature_allstates.png")
+  par(mar=c(5.1,4.1,4.1, 10),xpd=TRUE)
+  plot (0,0,ylim=c(20,80), xlim=c(1950,2018), xlab = 'Years', ylab ='Average Temperature in F', main="Average Temperature per State")
+  
+  for(i in 1:length(state.abb)){
+    lines(x=yr_vec, y=rev(stored_temp_mean[[i]]), col = colors[i], type = 'l') 
+  }
+  
+  legend("topright",inset=c(-0.5,0),legend=state.abb, col=colors, pch=c(16),ncol=3)
+  #END HERE
+  
+  ######plotting average percip data for three states AL, OH and TN######
+  png("Average_percip_3states.png")
+  stored_percip_mean <- setNames(stored_percip_mean, state.abb)
+  par(mar=c(5.1,4.1,4.1, 10),xpd=TRUE)
+  plot(0,0, ylim=c(20,80), xlim=c(1950,2018), xlab='Years', ylab='Average Percipitation', main="Average Percipitation for AL, OH & TN")
+  lines(x=yr_vec, y=stored_percip_mean[['OH']], col = "blue")
+  lines(x=yr_vec, y=stored_percip_mean[['AL']], col = "red")
+  lines(x=yr_vec, y=stored_percip_mean[['TN']], col = "magenta")
+  legend("topright",inset=c(-0.2,0),legend=c('AL', 'OH', 'TN'), col=c("red", "blue", "magenta"), pch=c(16))
+  
+  
+  
+  ######take 1950 year mean - last dated entry mean for temperature######
+  early_late_mean_diff <- vector()
+  
+  for(i in 1:length(state.abb)) {
+    hold_unlist <- unlist(stored_temp_mean[i])
+    early_late_mean_diff[i] <- hold_unlist[1] - tail(hold_unlist,n=1) 
+  }
+  
+  table_mean_diff <- as.table(early_late_mean_diff)
+  table_mean_diff <- setNames(table_mean_diff,state.abb)
+  write.table(table_mean_diff, file="early_late_mean_diff.txt", row.names = FALSE, col.names = FALSE, quote = FALSE)
 }
+######RUNS THE FUNCTION CODE WITH PERCIPITATION DATA, TEMPERATURE DATA AND YEARS OF INTEREST######
+######This function outputs 3 graphs and one table######
+clean_n_analyze(per_data, tem_data, year_vec)
 
 ```
+
+# **Introduction**
+Global average temperatures have been on the rise in the past years [@Hawkins2013]. This has been reported on many occasions, however global climate change has been met with scrutiny when it comes to the general public in the early years. However often times looking globally can skew data because many places vary constantly in temperature. In this analysis, I will be observing the effects of average temperature for the United States from years 1950 - 2016. This script has been written modularly in order to analyze any data from 1950 on as long as it is in a data frame format. A script is provided in folder of the script to convert ACIS to a data frame. 
+
+# **Methods**
+The webservice called Applied Climate Information collected various temperature and percipitation data across a variety of weather stations in the United States. The data were extracted and converted to a data frame format to perform the analysis. Many of the data points has NA values that would hinder this code from running. To prevent that the code was cleaned for analysis. This code takes the data frame and pulls the year and data provided for the state and calculates the mean for both temperature and percipitation. Using the mean, I plot a various plots to see the effects that time has on the temperature and percipitation changes in the United States. 
+
+# **Results**
+Using only the mean as the statistic of interest, there is an observed increase in temperature (Figure 1). ![_Figure 1_ An analysis of national average temperature when combining data from all weather stations.](C:/Users/USER/Documents/Prog_R/Data_Carpentry/ModularityHW_Anderson/Total_average_temp.png) This is a very basic view of how temperature change occurs in the United States. With this data we can see an obvious trend of temperature increase as time progresses. However, earlier I stated that condensing data down to a single statistic often misrepresents some areas. Using the available data, I split the analysis of the means by states and plotted to see if there were any obvious difference between states (Figure 2). ![_Figure 2_ A split of the means to observe temperature changes across all states in the US. Here we can observe fluctations or lack thereof in temperatures for different states. For example, Alaska (bottom red line) fluctuates in temperature quite a bit as time progresses just like Hawaii (top light green line).](C:/Users/USER/Documents/Prog_R/Data_Carpentry/ModularityHW_Anderson/Average_temperature_allstates.png) While this graph is quite messy since all states are represented, we can still piece apart trends. For instance, Hawaii (top light green line) and Alaska (bottom red line) show a variety of temperature changes as time progresses while there seems to be overlaying flucuation in a variety of the states that fall between them. To get a clearer picture of the changes among states, I took the mean value for the year 1950 and the last year (2016 by default) to be analyzed and substracted per each state to get a difference in the means. The idea behind this approach is to hopefully see a number of positive increases in mean temperatures between the initial and final years of the analysis. Table 1 holds these results, however using only these two means seems to show a general increase in temperatures when split up by state. 
+
+--------------------------------------
+```{r, table, echo=FALSE}
+hold_table <- read.table("early_late_mean_diff.txt", sep = "\t", header = FALSE)
+
+kable(hold_table, caption = "_Table 1_ Table produced when taking the mean temperature of 1950 subtracted from the last year to be analyzed (2016 by default")
+
+
+```
+--------------------------------------
+
+Percipitate also is recorded during the data collection of the weather stations. In order to avoid the same kind of messy graphs as with the temperature, I only plotted 3 states of interest, AL, OH and TN. Percipitation is an important data point to look at because global increases in temperature have also been linked to drought like conditions[@Hawkins2013]. Using a similar approach as before I plotted the average percipitation across these three states in Figure 3. ![_Figure 3_ Average Percipitation plotted for three states of interest. Using these we can observe trends about these three states across time](C:/Users/USER/Documents/Prog_R/Data_Carpentry/ModularityHW_Anderson/Average_percip_3states.png) Here we can observe taht while percipitation fluctuates greatly as time progresses, the latter dates seem to be declining. There seems to have been a major drought event between the 1950s-1960s acording to the data. 
+
+# **Discussion**
+This analysis was to provide a broad view on what types of effects can be observed using only the mean on national temperature and percipitation data for the US. Figure 1 shows us that the nation temperatures in the US are on the rise while Figure 2 splits up those observations into each of the states. Table 1 was to provide a very basic look at the difference between means of 1950 to the ending year chosen by the user, and the results seem to indicate a rise in temperature for most of the states. In order to reduce the muddiness of observing the data for percipitation, I chose to plot only AL, OH and TN. Here we can see lots of flucuations in percipitation in the three states. Here we can see that on average OH seems to get less percipitation than the other two states. 
+
+# **Follow up**
+As I have stated earlier in the paper, I only look at the mean as the main statistic. This paper could be improved tremendously by using a variety of other methods and hypothesis testing in order to fully support the claims. With the plethora of publications available on global temperature increases it is likely that the data presented has merit. This script was only to grasp the general trends of the data across the US and was not meant to be rigorous. Using modular technique this script can easily be changed to include a variety of other techniques such as linear regression or ANOVA to do some hypothesis testing. I mainly did not include these analyses because analyzing climate data is not my area of expertise and I did not wish to misinterpret the data.
+
+# References
+
+
+
+
+
+
