@@ -8,26 +8,36 @@ output:
 bibliography: bib.bib
 ---
 
+<!--***DAN: Search for "***DAN:" to find my comments-->
+
+<!--***DAN: As you are no doubt aware, this is a rough effort at completing the assignment, and that is understandable under the circumstances. Grades in this class are based on effortful completion of all parts of the assigned work, and you have done that (with one exception - see below) so I have not penalized you unduly (only for that exception - see below). But in future, and when circumstances are improved so that you are able, I suggest to invest a bit more effort into adopting the practices we are trying to learn in the course. You cannot learn new practices in computing without doing them yourself, so even if the new practices are mentally tricky, please try them - most you will likely find useful! That said, I emphasize I understand the reasons in this case. I gave you 8/10 for this assignment. The one part you did not do is the request to add comments indicating whch rules of modularity you were following at which parts of the assignment. See the subsection "Modularity" in the section "What speci???cally I will be looking for" in the homework pdf. Even though your effort level was fine overall, I am afraid I cannot fairly ignore the fact you skipped this. However, I will give you the same offer I have been giving other students: if you revise your assignment to include these comments and resubmit, you can get these points back. To do this, just push a revision to git and then send me an email.-->
+
+<!--**DAN: Two commits is pretty minimal for this assignment and indicates you did not really use git as a working tool, but rather did most of the work and then committed that and then did one more commit. Next time try to use it the way it was intended, as a version control system! It helps once you get used to it, I promise! And one purpose of these assignments is to get used to it!-->
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(knitr)
 ```
 
-
+<!--***DAN: much better to use informative chunk names than "blah"!-->
 ```{r,blah, include=FALSE, echo=FALSE}
 
 setwd("C:/Users/USER/Documents/Prog_R/Data_Carpentry/ModularityHW_Anderson")
+#***DAN: this is not necessary, the working directory is always the one in which the Rmd is for an Rmd.
+
 ######Reads in data and sets which years you will analyze#####
 ######IMPORTANT, IN ORDER TO RUN PROPERLY YOU MUST CHANGE YEAR VEC TO YOUR YEARS OF INTEREST!!!! DEFAULT WILL BE TO 2016######
 
 ######Change the end year you wish to analyze, this is the only variable needed to be changed unless you wish to upload a new dataset######
 change_year_here <- 2016
+#***DAN: this is one of the lessons of modularity, but you have not flagged it in a comment!
 
 per_data <- readRDS("USAannualPcpn1950_2016.rds")
 tem_data <- readRDS("USAannualTemp1950_2016.rds")
 year_vec <- paste(1950:change_year_here)
 
 ######Function to clean up the data, analyze and plot various data described in the function######
+#***DAN: this is a function, which seems like modularity, but it does everything, so it's not! You could have had one function for cleaning, one for analyzing, and one for plotting, for instance, and these functions could be called with *either* precip or temp data (same analysis on either). That's extensibility. What if we now asked you to analyze sspring temperatures, so you have another climate variable to carry out the same analysis on? With your code, that would require reanalysis. But with code as I described above it would require minimal change. 
 clean_n_analyze <- function(p_data, t_data, yr_vec){
   
   #clean up the data and create temp lists and vectors for anaylsis#
@@ -107,6 +117,9 @@ clean_n_analyze <- function(p_data, t_data, yr_vec){
 clean_n_analyze(per_data, tem_data, year_vec)
 
 ```
+
+<!--***DAN: The plots were not included in the html output you sent, and I am afraid I cannot spend time trying to get your code to knit, so I have not seen your plots.-->
+
 
 # **Introduction**
 Global average temperatures have been on the rise in the past years [@Hawkins2013]. This has been reported on many occasions, however global climate change has been met with scrutiny when it comes to the general public in the early years. However often times looking globally can skew data because many places vary constantly in temperature. In this analysis, I will be observing the effects of average temperature for the United States from years 1950 - 2016. This script has been written modularly in order to analyze any data from 1950 on as long as it is in a data frame format. A script is provided in folder of the script to convert ACIS to a data frame. 
